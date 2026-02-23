@@ -134,6 +134,19 @@ Then test on both:
 - Desktop browser (`http://localhost:8000`)
 - Phone browser (`https://<your-ngrok-domain>`)
 
+## Deploy to Cloudflare Pages
+
+```bash
+cd /Users/anish/Documents/stuff/wip-app
+./scripts/deploy-cloudflare.sh
+```
+
+Optional overrides:
+
+```bash
+PROJECT_NAME=whip-app BRANCH_NAME=main ./scripts/deploy-cloudflare.sh
+```
+
 ## Future Improvements
 
 - Adjustable motion sensitivity slider
