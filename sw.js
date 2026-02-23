@@ -1,4 +1,4 @@
-const CACHE = 'whip-app-v5';
+const CACHE = 'whip-app-v7';
 const ASSETS = ['/index.html', '/manifest.json', '/sw.js', '/assets/crack_the_whip.mp3'];
 
 self.addEventListener('install', event => {

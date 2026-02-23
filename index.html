@@ -26,6 +26,7 @@
 
     body {
       background: #0a0a12;
+      background: radial-gradient(ellipse at 50% 20%, #141010 0%, #0a0a12 65%);
       color: #FFB800;
       font-family: 'Courier New', Courier, monospace;
       display: flex;
@@ -33,6 +34,23 @@
       align-items: center;
       justify-content: space-between;
       padding: 40px 20px 50px;
+      min-height: 100dvh;
+    }
+
+    /* ── Scanline overlay ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        #00000009 2px,
+        #00000009 4px
+      );
+      pointer-events: none;
+      z-index: 200;
     }
 
     /* ── Header ── */
@@ -42,16 +60,17 @@
     }
 
     header h1 {
-      font-size: 1.1rem;
+      font-size: 1.3rem;
       font-weight: bold;
       text-transform: uppercase;
-      opacity: 0.7;
+      opacity: 0.85;
+      text-shadow: 0 0 20px #FFB80044;
     }
 
     header p {
       font-size: 0.65rem;
       opacity: 0.4;
-      margin-top: 4px;
+      margin-top: 6px;
       letter-spacing: 0.15em;
     }
 
@@ -68,17 +87,41 @@
     /* ── SVG Whip ── */
     #whip-container {
       position: relative;
-      width: 220px;
-      height: 220px;
+      width: 240px;
+      height: 240px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
+    /* Corner brackets around the whip */
+    #whip-container::before,
+    #whip-container::after {
+      content: '';
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border-color: #FFB80030;
+      border-style: solid;
+      pointer-events: none;
+    }
+
+    #whip-container::before {
+      top: 8px;
+      left: 8px;
+      border-width: 2px 0 0 2px;
+    }
+
+    #whip-container::after {
+      bottom: 8px;
+      right: 8px;
+      border-width: 0 2px 2px 0;
+    }
+
     #whip-svg {
       width: 210px;
       height: 210px;
-      filter: drop-shadow(0 0 12px #FFB80066);
+      filter: drop-shadow(0 0 14px #FFB80055);
       transform-origin: center center;
     }
 
@@ -95,12 +138,11 @@
       100% { transform: rotate(0deg)   scale(1); }
     }
 
-    /* Spark burst circles */
+    /* Spark burst */
     .spark {
       position: absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
+      width: 4px;
+      height: 4px;
       background: #FFB800;
       top: 50%;
       left: 50%;
@@ -114,7 +156,7 @@
 
     @keyframes sparkFly {
       0%   { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.2); }
+      100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.3); }
     }
 
     /* ── Counter ── */
@@ -131,10 +173,11 @@
     }
 
     #counter {
-      font-size: 4rem;
+      font-size: 4.5rem;
       font-weight: bold;
       line-height: 1;
       display: inline-block;
+      text-shadow: 0 0 24px #FFB80044;
     }
 
     #counter.bounce {
@@ -148,16 +191,16 @@
       100% { transform: scale(1); }
     }
 
-    /* ── Permission screen ── */
-    #permission-screen {
+    /* ── Shared screen styles ── */
+    .entry-screen {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 24px;
+      gap: 28px;
       text-align: center;
     }
 
-    #permission-screen p, #start-screen p {
+    .entry-screen p {
       font-size: 0.8rem;
       opacity: 0.55;
       line-height: 1.6;
@@ -165,15 +208,8 @@
       letter-spacing: 0.05em;
     }
 
-    #start-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      text-align: center;
-    }
-
-    #enable-btn {
+    /* ── Action buttons (sharp, outlined, terminal-style) ── */
+    .action-btn {
       background: none;
       border: 2px solid #FFB800;
       color: #FFB800;
@@ -184,51 +220,39 @@
       text-transform: uppercase;
       padding: 18px 40px;
       cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.15s, color 0.15s;
+      border-radius: 0;
+      box-shadow: 0 0 16px #FFB80022;
+      transition: background 0.12s, color 0.12s, box-shadow 0.12s;
       -webkit-tap-highlight-color: transparent;
     }
 
-    #enable-btn:active, #start-btn:active {
+    .action-btn:active {
       background: #FFB800;
       color: #0a0a12;
+      box-shadow: 0 0 32px #FFB80055;
     }
 
-    #start-btn {
-      background: none;
-      border: 2px solid #FFB800;
-      color: #FFB800;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 1rem;
-      font-weight: bold;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      padding: 18px 40px;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.15s, color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* ── Tap fallback button ── */
+    /* ── Tap button ── */
     #tap-btn {
       display: none;
       background: none;
-      border: 2px solid #FFB80066;
+      border: 1px solid #FFB80055;
       color: #FFB80099;
       font-family: 'Courier New', Courier, monospace;
       font-size: 0.75rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      padding: 12px 28px;
+      padding: 14px 32px;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 0;
       -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.12s, color 0.12s, box-shadow 0.12s;
     }
 
     #tap-btn:active {
       border-color: #FFB800;
       color: #FFB800;
+      box-shadow: 0 0 20px #FFB80033;
     }
 
     /* ── Footer instruction ── */
@@ -236,7 +260,7 @@
       text-align: center;
       font-size: 0.65rem;
       letter-spacing: 0.2em;
-      opacity: 0.35;
+      opacity: 0.3;
       text-transform: uppercase;
     }
 
@@ -244,7 +268,7 @@
     #flash {
       position: fixed;
       inset: 0;
-      background: #fff;
+      background: #FFB800;
       opacity: 0;
       pointer-events: none;
       z-index: 100;
@@ -252,8 +276,8 @@
     }
 
     #flash.active {
-      opacity: 0.82;
-      transition: opacity 0.32s ease-out;
+      opacity: 0.65;
+      transition: opacity 0.3s ease-out;
     }
 
     /* ── Permission denied message ── */
@@ -268,12 +292,33 @@
 
     /* ── Glow pulse on ready state ── */
     @keyframes idleGlow {
-      0%, 100% { filter: drop-shadow(0 0 10px #FFB80044); }
-      50%       { filter: drop-shadow(0 0 22px #FFB80099); }
+      0%, 100% { filter: drop-shadow(0 0 10px #FFB80033); }
+      50%       { filter: drop-shadow(0 0 24px #FFB80088); }
     }
 
     #whip-svg.idle {
       animation: idleGlow 2.8s ease-in-out infinite;
+    }
+
+    /* ── Corner flash on crack ── */
+    @keyframes cornerFlash {
+      0%   { border-color: #FFB800; }
+      100% { border-color: #FFB80030; }
+    }
+
+    #whip-container.crack-ring::before,
+    #whip-container.crack-ring::after {
+      animation: cornerFlash 0.4s ease-out forwards;
+    }
+
+    /* ── Fade-in for screens ── */
+    @keyframes fadeIn {
+      0%   { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.35s ease-out both;
     }
   </style>
 </head>
@@ -292,18 +337,18 @@
   <main>
 
     <!-- iOS permission screen (shown first on iOS) -->
-    <div id="permission-screen" style="display:none;">
+    <div id="permission-screen" class="entry-screen" style="display:none;">
       <p>iOS requires permission to<br>access motion sensors.</p>
-      <button id="enable-btn">Enable Whip</button>
+      <button id="enable-btn" class="action-btn">Enable Whip</button>
       <div id="denied-msg">
-        Permission denied.<br>Go to <strong>Settings → Safari → Motion &amp; Orientation Access</strong> and try again.
+        Permission denied.<br>Go to <strong>Settings &rarr; Safari &rarr; Motion &amp; Orientation Access</strong> and try again.
       </div>
     </div>
 
     <!-- Start screen for non-iOS (unlocks audio via user gesture) -->
-    <div id="start-screen" style="display:none;">
+    <div id="start-screen" class="entry-screen" style="display:none;">
       <p>Tap to start, then snap your<br>phone like cracking a whip.</p>
-      <button id="start-btn">Start</button>
+      <button id="start-btn" class="action-btn">Start</button>
     </div>
 
     <!-- Main whip UI (hidden until permission granted / not needed) -->
@@ -531,10 +576,17 @@
       crackStar.style.opacity = '1';
       setTimeout(() => { crackStar.style.opacity = '0'; }, 150);
 
-      // 6. Spark particles
+      // 6. Ring pulse
+      const container = document.getElementById('whip-container');
+      container.classList.remove('crack-ring');
+      void container.offsetWidth;
+      container.classList.add('crack-ring');
+      container.addEventListener('animationend', () => container.classList.remove('crack-ring'), { once: true });
+
+      // 7. Spark particles
       spawnSparks();
 
-      // 7. Counter
+      // 8. Counter
       crackCount++;
       counterEl.textContent = crackCount;
       counterEl.classList.remove('bounce');
@@ -606,16 +658,19 @@
       permScreen.style.display = 'none';
       startScreen.style.display = 'none';
       whipUi.style.display = 'flex';
+      whipUi.classList.add('fade-in');
     }
 
     function showPermissionScreen() {
       permScreen.style.display = 'flex';
+      permScreen.classList.add('fade-in');
       startScreen.style.display = 'none';
       whipUi.style.display = 'none';
     }
 
     function showStartScreen() {
       startScreen.style.display = 'flex';
+      startScreen.classList.add('fade-in');
       permScreen.style.display = 'none';
       whipUi.style.display = 'none';
     }
