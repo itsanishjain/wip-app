@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -10,13 +11,16 @@
   <link rel="manifest" href="manifest.json">
   <title>Whip App</title>
   <style>
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    html, body {
+    html,
+    body {
       height: 100%;
       overflow: hidden;
       user-select: none;
@@ -42,13 +46,11 @@
       content: '';
       position: fixed;
       inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        #00000009 2px,
-        #00000009 4px
-      );
+      background: repeating-linear-gradient(0deg,
+          transparent,
+          transparent 2px,
+          #00000009 2px,
+          #00000009 4px);
       pointer-events: none;
       z-index: 200;
     }
@@ -130,12 +132,29 @@
     }
 
     @keyframes whipCrack {
-      0%   { transform: rotate(0deg)   scale(1); }
-      15%  { transform: rotate(-18deg) scale(1.08); }
-      35%  { transform: rotate(12deg)  scale(0.96); }
-      55%  { transform: rotate(-6deg)  scale(1.03); }
-      75%  { transform: rotate(3deg)   scale(0.99); }
-      100% { transform: rotate(0deg)   scale(1); }
+      0% {
+        transform: rotate(0deg) scale(1);
+      }
+
+      15% {
+        transform: rotate(-18deg) scale(1.08);
+      }
+
+      35% {
+        transform: rotate(12deg) scale(0.96);
+      }
+
+      55% {
+        transform: rotate(-6deg) scale(1.03);
+      }
+
+      75% {
+        transform: rotate(3deg) scale(0.99);
+      }
+
+      100% {
+        transform: rotate(0deg) scale(1);
+      }
     }
 
     /* Spark burst */
@@ -155,8 +174,15 @@
     }
 
     @keyframes sparkFly {
-      0%   { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.3); }
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate(0, 0) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.3);
+      }
     }
 
     /* ── Counter ── */
@@ -185,10 +211,21 @@
     }
 
     @keyframes counterBounce {
-      0%   { transform: scale(1); }
-      40%  { transform: scale(1.35); }
-      70%  { transform: scale(0.92); }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+      }
+
+      40% {
+        transform: scale(1.35);
+      }
+
+      70% {
+        transform: scale(0.92);
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
     /* ── Shared screen styles ── */
@@ -292,8 +329,15 @@
 
     /* ── Glow pulse on ready state ── */
     @keyframes idleGlow {
-      0%, 100% { filter: drop-shadow(0 0 10px #FFB80033); }
-      50%       { filter: drop-shadow(0 0 24px #FFB80088); }
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 10px #FFB80033);
+      }
+
+      50% {
+        filter: drop-shadow(0 0 24px #FFB80088);
+      }
     }
 
     #whip-svg.idle {
@@ -302,8 +346,13 @@
 
     /* ── Corner flash on crack ── */
     @keyframes cornerFlash {
-      0%   { border-color: #FFB800; }
-      100% { border-color: #FFB80030; }
+      0% {
+        border-color: #FFB800;
+      }
+
+      100% {
+        border-color: #FFB80030;
+      }
     }
 
     #whip-container.crack-ring::before,
@@ -313,19 +362,152 @@
 
     /* ── Fade-in for screens ── */
     @keyframes fadeIn {
-      0%   { opacity: 0; }
-      100% { opacity: 1; }
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
     }
 
     .fade-in {
       animation: fadeIn 0.35s ease-out both;
     }
+
+    /* ── Share feature ── */
+    #share-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: 1px solid #FFB80055;
+      color: #FFB800;
+      padding: 8px 12px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      z-index: 10;
+      transition: all 0.2s;
+    }
+
+    #share-btn:hover {
+      border-color: #FFB800;
+      box-shadow: 0 0 10px #FFB80055;
+    }
+
+    #share-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 18, 0.9);
+      z-index: 300;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #share-modal.active {
+      display: flex;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .share-content {
+      background: #141010;
+      border: 1px solid #FFB80055;
+      padding: 30px;
+      box-shadow: 0 0 32px #FFB80044;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 90vw;
+      width: 320px;
+    }
+
+    .share-content h2 {
+      font-size: 1rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .share-content img {
+      width: 160px;
+      height: 160px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .share-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .share-row input {
+      flex: 1;
+      background: rgba(255, 184, 0, 0.05);
+      border: 1px solid #FFB80055;
+      color: #FFB800;
+      padding: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.75rem;
+      min-width: 0;
+    }
+
+    .share-row button {
+      padding: 0 16px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .share-socials {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .social-btn {
+      background: rgba(255, 184, 0, 0.1);
+      border: 1px solid #FFB80055;
+      color: #FFB800;
+      padding: 10px;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .social-btn:hover {
+      background: rgba(255, 184, 0, 0.3);
+      border-color: #FFB800;
+      box-shadow: 0 0 16px #FFB80044;
+    }
+
+    .social-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
   </style>
 </head>
+
 <body>
 
   <!-- Flash overlay -->
   <div id="flash"></div>
+
+  <button id="share-btn">Share</button>
 
   <!-- Header -->
   <header>
@@ -341,7 +523,8 @@
       <p>iOS requires permission to<br>access motion sensors.</p>
       <button id="enable-btn" class="action-btn">Enable Whip</button>
       <div id="denied-msg">
-        Permission denied.<br>Go to <strong>Settings &rarr; Safari &rarr; Motion &amp; Orientation Access</strong> and try again.
+        Permission denied.<br>Go to <strong>Settings &rarr; Safari &rarr; Motion &amp; Orientation Access</strong> and
+        try again.
       </div>
     </div>
 
@@ -358,21 +541,21 @@
         <!-- Inline SVG whip -->
         <svg id="whip-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="idle">
           <!-- Handle -->
-          <rect x="20" y="92" width="48" height="16" rx="5" fill="#FFB800" opacity="0.9"/>
+          <rect x="20" y="92" width="48" height="16" rx="5" fill="#FFB800" opacity="0.9" />
           <!-- Whip body: bezier curve that tapers -->
-          <path d="M68 100 C100 60, 140 120, 170 85" stroke="#FFB800" stroke-width="5"
-                stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
-          <path d="M68 100 C100 60, 140 120, 170 85" stroke="#FFB800" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+          <path d="M68 100 C100 60, 140 120, 170 85" stroke="#FFB800" stroke-width="5" stroke-linecap="round"
+            stroke-linejoin="round" opacity="0.9" />
+          <path d="M68 100 C100 60, 140 120, 170 85" stroke="#FFB800" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round" opacity="0.5" />
           <!-- Tip -->
-          <path d="M170 85 C180 78, 185 72, 183 65" stroke="#FFB800" stroke-width="2"
-                stroke-linecap="round" opacity="0.8"/>
+          <path d="M170 85 C180 78, 185 72, 183 65" stroke="#FFB800" stroke-width="2" stroke-linecap="round"
+            opacity="0.8" />
           <!-- Crack star at tip -->
           <g id="crack-star" transform="translate(183, 63)" opacity="0">
-            <line x1="0" y1="-8" x2="0" y2="8" stroke="#FFB800" stroke-width="2" stroke-linecap="round"/>
-            <line x1="-8" y1="0" x2="8" y2="0" stroke="#FFB800" stroke-width="2" stroke-linecap="round"/>
-            <line x1="-6" y1="-6" x2="6" y2="6" stroke="#FFB800" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="6" y1="-6" x2="-6" y2="6" stroke="#FFB800" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="0" y1="-8" x2="0" y2="8" stroke="#FFB800" stroke-width="2" stroke-linecap="round" />
+            <line x1="-8" y1="0" x2="8" y2="0" stroke="#FFB800" stroke-width="2" stroke-linecap="round" />
+            <line x1="-6" y1="-6" x2="6" y2="6" stroke="#FFB800" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="6" y1="-6" x2="-6" y2="6" stroke="#FFB800" stroke-width="1.5" stroke-linecap="round" />
           </g>
         </svg>
       </div>
@@ -392,6 +575,39 @@
   <!-- Footer -->
   <footer id="footer-hint">Snap your phone like cracking a whip</footer>
 
+  <!-- Share Modal -->
+  <div id="share-modal">
+    <div class="share-content">
+      <h2>Share App</h2>
+      <img id="share-qr" src="" alt="QR Code">
+      <div class="share-row">
+        <input type="text" id="share-url" readonly>
+        <button id="copy-btn" class="action-btn">Copy</button>
+      </div>
+      <div class="share-socials">
+        <a id="share-wa" href="#" target="_blank" class="social-btn" title="WhatsApp">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+          </svg>
+        </a>
+        <a id="share-tg" href="#" target="_blank" class="social-btn" title="Telegram">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.833.94z" />
+          </svg>
+        </a>
+        <a id="share-email" href="#" class="social-btn" title="Email">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 12.713l-11.985-9.713h23.97l-11.985 9.713zm0 2.574l-12-9.725v15.438h24v-15.438l-12 9.725z" />
+          </svg>
+        </a>
+      </div>
+      <button id="close-modal-btn" class="action-btn"
+        style="padding: 10px 16px; margin-top: 10px; font-size: 0.75rem; border-color: transparent; box-shadow: none;">Close</button>
+    </div>
+  </div>
+
   <script>
     // ─── State ───────────────────────────────────────────────────
     let audioCtx = null;
@@ -407,18 +623,18 @@
     let motionListenerActive = false;
 
     // DOM refs
-    const flash         = document.getElementById('flash');
-    const permScreen    = document.getElementById('permission-screen');
-    const enableBtn     = document.getElementById('enable-btn');
-    const deniedMsg     = document.getElementById('denied-msg');
-    const whipUi        = document.getElementById('whip-ui');
-    const whipSvg       = document.getElementById('whip-svg');
-    const crackStar     = document.getElementById('crack-star');
-    const counterEl     = document.getElementById('counter');
-    const tapBtn        = document.getElementById('tap-btn');
-    const footerHint    = document.getElementById('footer-hint');
-    const startScreen   = document.getElementById('start-screen');
-    const startBtn      = document.getElementById('start-btn');
+    const flash = document.getElementById('flash');
+    const permScreen = document.getElementById('permission-screen');
+    const enableBtn = document.getElementById('enable-btn');
+    const deniedMsg = document.getElementById('denied-msg');
+    const whipUi = document.getElementById('whip-ui');
+    const whipSvg = document.getElementById('whip-svg');
+    const crackStar = document.getElementById('crack-star');
+    const counterEl = document.getElementById('counter');
+    const tapBtn = document.getElementById('tap-btn');
+    const footerHint = document.getElementById('footer-hint');
+    const startScreen = document.getElementById('start-screen');
+    const startBtn = document.getElementById('start-btn');
 
     // ─── AudioContext ─────────────────────────────────────────────
     let audioUnlocked = false;
@@ -441,7 +657,7 @@
       src.buffer = buf;
       src.connect(audioCtx.destination);
       src.start(0);
-      loadWhipSample().catch(() => {});
+      loadWhipSample().catch(() => { });
       audioUnlocked = true;
     }
 
@@ -510,7 +726,7 @@
       if (playSampleBuffer()) return;
       loadWhipSample().then(() => {
         playSampleBuffer();
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
     // ─── Gesture detection ────────────────────────────────────────
@@ -523,7 +739,7 @@
       }
 
       const magnitude = Math.sqrt(ag.x * ag.x + ag.y * ag.y + ag.z * ag.z);
-      const adjusted  = Math.abs(magnitude - 9.8);
+      const adjusted = Math.abs(magnitude - 9.8);
 
       const now = Date.now();
       if (now - lastCrackTime < COOLDOWN_MS) {
@@ -602,9 +818,9 @@
         const spark = document.createElement('div');
         spark.className = 'spark';
         const angle = (i / count) * 2 * Math.PI;
-        const dist  = 55 + Math.random() * 35;
-        const tx    = Math.round(Math.cos(angle) * dist);
-        const ty    = Math.round(Math.sin(angle) * dist);
+        const dist = 55 + Math.random() * 35;
+        const tx = Math.round(Math.cos(angle) * dist);
+        const ty = Math.round(Math.sin(angle) * dist);
         spark.style.setProperty('--tx', tx + 'px');
         spark.style.setProperty('--ty', ty + 'px');
         container.appendChild(spark);
@@ -689,6 +905,61 @@
       }
     });
 
+    // ─── Share Logic ──────────────────────────────────────────────
+    const shareBtn = document.getElementById('share-btn');
+    const shareModal = document.getElementById('share-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const shareUrlInput = document.getElementById('share-url');
+    const shareQrImg = document.getElementById('share-qr');
+
+    shareBtn.addEventListener('click', () => {
+      // Use clean url without query params/hash for sharing
+      const url = window.location.href.split('?')[0].split('#')[0];
+      const text = encodeURIComponent('Check out the Whip App!');
+      const encodedUrl = encodeURIComponent(url);
+
+      // Update links
+      shareUrlInput.value = url;
+      shareQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodedUrl}`;
+
+      // Social Links
+      document.getElementById('share-wa').href = `https://api.whatsapp.com/send?text=${text}%20${encodedUrl}`;
+      document.getElementById('share-tg').href = `https://t.me/share/url?url=${encodedUrl}&text=${text}`;
+      document.getElementById('share-email').href = `mailto:?subject=${text}&body=${encodedUrl}`;
+
+      shareModal.classList.add('active');
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      shareModal.classList.remove('active');
+      copyBtn.textContent = 'Copy';
+    });
+
+    // Close modal when clicking outside the modal content
+    shareModal.addEventListener('click', (e) => {
+      if (e.target === shareModal) {
+        shareModal.classList.remove('active');
+        copyBtn.textContent = 'Copy';
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      shareUrlInput.select();
+      shareUrlInput.setSelectionRange(0, 99999);
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareUrlInput.value).then(() => {
+          copyBtn.textContent = 'Copied!';
+        }).catch(() => {
+          document.execCommand('copy');
+          copyBtn.textContent = 'Copied!';
+        });
+      } else {
+        document.execCommand('copy');
+        copyBtn.textContent = 'Copied!';
+      }
+    });
+
     // ─── Init ─────────────────────────────────────────────────────
     function init() {
       if (needsMotionPermission()) {
@@ -705,9 +976,10 @@
     // Service worker registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+        navigator.serviceWorker.register('/sw.js').catch(() => { });
       });
     }
-</script>
+  </script>
 </body>
+
 </html>
