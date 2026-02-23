@@ -396,147 +396,76 @@
       src.buffer = buf;
       src.connect(audioCtx.destination);
       src.start(0);
+      loadWhipSample().catch(() => {});
       audioUnlocked = true;
     }
 
-    // ─── Sound synthesis ─────────────────────────────────────────
-    let sharedNoiseBuffer = null;
+    // ─── Whip sample playback ─────────────────────────────────────
+    const WHIP_SAMPLE_PATH = '/assets/crack_the_whip.mp3';
+    let whipSampleBuffer = null;
+    let whipSampleLoadPromise = null;
 
-    function getNoiseBuffer(ctx) {
-      if (sharedNoiseBuffer && sharedNoiseBuffer.sampleRate === ctx.sampleRate) {
-        return sharedNoiseBuffer;
-      }
-      const length = Math.floor(ctx.sampleRate * 0.6);
-      const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
-      sharedNoiseBuffer = buffer;
-      return buffer;
+    function decodeAudioDataCompat(ctx, arrayBuffer) {
+      return new Promise((resolve, reject) => {
+        try {
+          const maybePromise = ctx.decodeAudioData(
+            arrayBuffer,
+            decoded => resolve(decoded),
+            err => reject(err)
+          );
+          if (maybePromise && typeof maybePromise.then === 'function') {
+            maybePromise.then(resolve).catch(reject);
+          }
+        } catch (err) {
+          reject(err);
+        }
+      });
     }
 
-    function makeDistortionCurve(amount = 65) {
-      const k = typeof amount === 'number' ? amount : 65;
-      const n = 1024;
-      const curve = new Float32Array(n);
-      const deg = Math.PI / 180;
-      for (let i = 0; i < n; i++) {
-        const x = (i * 2) / n - 1;
-        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
-      }
-      return curve;
+    function loadWhipSample() {
+      ensureAudioCtx();
+      if (whipSampleBuffer) return Promise.resolve(whipSampleBuffer);
+      if (whipSampleLoadPromise) return whipSampleLoadPromise;
+
+      whipSampleLoadPromise = fetch(WHIP_SAMPLE_PATH, { cache: 'no-store' })
+        .then(resp => {
+          if (!resp.ok) throw new Error('Failed to load whip sample: ' + resp.status);
+          return resp.arrayBuffer();
+        })
+        .then(arrayBuffer => decodeAudioDataCompat(audioCtx, arrayBuffer))
+        .then(decoded => {
+          whipSampleBuffer = decoded;
+          return decoded;
+        })
+        .catch(err => {
+          whipSampleLoadPromise = null;
+          console.error('Whip sample load error:', err);
+          throw err;
+        });
+
+      return whipSampleLoadPromise;
+    }
+
+    function playSampleBuffer() {
+      if (!whipSampleBuffer) return false;
+      ensureAudioCtx();
+      const source = audioCtx.createBufferSource();
+      source.buffer = whipSampleBuffer;
+
+      const gain = audioCtx.createGain();
+      gain.gain.value = 1.0;
+
+      source.connect(gain);
+      gain.connect(audioCtx.destination);
+      source.start(audioCtx.currentTime + 0.001);
+      return true;
     }
 
     function synthesizeWhipCrack() {
-      ensureAudioCtx();
-      const ctx = audioCtx;
-      const now = ctx.currentTime + 0.004;
-      const intensity = 0.92 + Math.random() * 0.22;
-      const noiseBuffer = getNoiseBuffer(ctx);
-
-      const master = ctx.createGain();
-      master.gain.value = 0.85;
-
-      const compressor = ctx.createDynamicsCompressor();
-      compressor.threshold.value = -22;
-      compressor.knee.value = 7;
-      compressor.ratio.value = 10;
-      compressor.attack.value = 0.001;
-      compressor.release.value = 0.09;
-
-      master.connect(compressor);
-      compressor.connect(ctx.destination);
-
-      // Main crack transient.
-      const crackNoise = ctx.createBufferSource();
-      crackNoise.buffer = noiseBuffer;
-
-      const crackHP = ctx.createBiquadFilter();
-      crackHP.type = 'highpass';
-      crackHP.frequency.value = 1700 + Math.random() * 450;
-
-      const crackBP = ctx.createBiquadFilter();
-      crackBP.type = 'bandpass';
-      crackBP.frequency.value = 3600 + Math.random() * 700;
-      crackBP.Q.value = 2.7;
-
-      const crackDistortion = ctx.createWaveShaper();
-      crackDistortion.curve = makeDistortionCurve(75);
-      crackDistortion.oversample = '4x';
-
-      const crackGain = ctx.createGain();
-      crackGain.gain.setValueAtTime(0.0001, now);
-      crackGain.gain.exponentialRampToValueAtTime(1.75 * intensity, now + 0.0012);
-      crackGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
-
-      crackNoise.connect(crackHP);
-      crackHP.connect(crackBP);
-      crackBP.connect(crackDistortion);
-      crackDistortion.connect(crackGain);
-      crackGain.connect(master);
-
-      crackNoise.start(now);
-      crackNoise.stop(now + 0.05);
-
-      // Body snap.
-      const snapOsc = ctx.createOscillator();
-      snapOsc.type = 'sawtooth';
-      snapOsc.frequency.setValueAtTime(230, now);
-      snapOsc.frequency.exponentialRampToValueAtTime(72, now + 0.055);
-
-      const snapLP = ctx.createBiquadFilter();
-      snapLP.type = 'lowpass';
-      snapLP.frequency.value = 950;
-      snapLP.Q.value = 0.85;
-
-      const snapGain = ctx.createGain();
-      snapGain.gain.setValueAtTime(0.0001, now);
-      snapGain.gain.exponentialRampToValueAtTime(0.32 * intensity, now + 0.003);
-      snapGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
-
-      snapOsc.connect(snapLP);
-      snapLP.connect(snapGain);
-      snapGain.connect(master);
-
-      snapOsc.start(now);
-      snapOsc.stop(now + 0.075);
-
-      // Tail wash.
-      const tailNoise = ctx.createBufferSource();
-      tailNoise.buffer = noiseBuffer;
-
-      const tailBP = ctx.createBiquadFilter();
-      tailBP.type = 'bandpass';
-      tailBP.frequency.value = 1500;
-      tailBP.Q.value = 0.55;
-
-      const tailGain = ctx.createGain();
-      const tailStart = now + 0.01;
-      tailGain.gain.setValueAtTime(0.0001, tailStart);
-      tailGain.gain.exponentialRampToValueAtTime(0.2 * intensity, tailStart + 0.02);
-      tailGain.gain.exponentialRampToValueAtTime(0.0001, tailStart + 0.24);
-
-      tailNoise.connect(tailBP);
-      tailBP.connect(tailGain);
-      tailGain.connect(master);
-
-      tailNoise.start(tailStart);
-      tailNoise.stop(tailStart + 0.26);
-
-      // Click bite at the beginning.
-      const clickOsc = ctx.createOscillator();
-      clickOsc.type = 'triangle';
-      clickOsc.frequency.setValueAtTime(2400, now);
-      clickOsc.frequency.exponentialRampToValueAtTime(650, now + 0.014);
-
-      const clickGain = ctx.createGain();
-      clickGain.gain.setValueAtTime(0.22, now);
-      clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.016);
-
-      clickOsc.connect(clickGain);
-      clickGain.connect(master);
-
-      clickOsc.start(now);
-      clickOsc.stop(now + 0.018);
+      if (playSampleBuffer()) return;
+      loadWhipSample().then(() => {
+        playSampleBuffer();
+      }).catch(() => {});
     }
 
     // ─── Gesture detection ────────────────────────────────────────
