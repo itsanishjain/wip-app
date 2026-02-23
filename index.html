@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#FFB800">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Whip App">
+  <link rel="manifest" href="manifest.json">
+  <title>Whip App</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      background: #0a0a12;
+      color: #FFB800;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 40px 20px 50px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      letter-spacing: 0.3em;
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    header p {
+      font-size: 0.65rem;
+      opacity: 0.4;
+      margin-top: 4px;
+      letter-spacing: 0.15em;
+    }
+
+    /* ── Main area ── */
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    /* ── SVG Whip ── */
+    #whip-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #whip-svg {
+      width: 210px;
+      height: 210px;
+      filter: drop-shadow(0 0 12px #FFB80066);
+      transform-origin: center center;
+    }
+
+    #whip-svg.cracking {
+      animation: whipCrack 0.45s ease-out forwards;
+    }
+
+    @keyframes whipCrack {
+      0%   { transform: rotate(0deg)   scale(1); }
+      15%  { transform: rotate(-18deg) scale(1.08); }
+      35%  { transform: rotate(12deg)  scale(0.96); }
+      55%  { transform: rotate(-6deg)  scale(1.03); }
+      75%  { transform: rotate(3deg)   scale(0.99); }
+      100% { transform: rotate(0deg)   scale(1); }
+    }
+
+    /* Spark burst circles */
+    .spark {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #FFB800;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .spark.fly {
+      animation: sparkFly 0.5s ease-out forwards;
+    }
+
+    @keyframes sparkFly {
+      0%   { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.2); }
+    }
+
+    /* ── Counter ── */
+    #counter-wrap {
+      text-align: center;
+    }
+
+    #counter-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      opacity: 0.4;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    #counter {
+      font-size: 4rem;
+      font-weight: bold;
+      line-height: 1;
+      display: inline-block;
+    }
+
+    #counter.bounce {
+      animation: counterBounce 0.35s ease-out forwards;
+    }
+
+    @keyframes counterBounce {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.35); }
+      70%  { transform: scale(0.92); }
+      100% { transform: scale(1); }
+    }
+
+    /* ── Permission screen ── */
+    #permission-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      text-align: center;
+    }
+
+    #permission-screen p, #start-screen p {
+      font-size: 0.8rem;
+      opacity: 0.55;
+      line-height: 1.6;
+      max-width: 260px;
+      letter-spacing: 0.05em;
+    }
+
+    #start-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      text-align: center;
+    }
+
+    #enable-btn {
+      background: none;
+      border: 2px solid #FFB800;
+      color: #FFB800;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 18px 40px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #enable-btn:active, #start-btn:active {
+      background: #FFB800;
+      color: #0a0a12;
+    }
+
+    #start-btn {
+      background: none;
+      border: 2px solid #FFB800;
+      color: #FFB800;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 18px 40px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Tap fallback button ── */
+    #tap-btn {
+      display: none;
+      background: none;
+      border: 2px solid #FFB80066;
+      color: #FFB80099;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 12px 28px;
+      cursor: pointer;
+      border-radius: 4px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #tap-btn:active {
+      border-color: #FFB800;
+      color: #FFB800;
+    }
+
+    /* ── Footer instruction ── */
+    footer {
+      text-align: center;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      opacity: 0.35;
+      text-transform: uppercase;
+    }
+
+    /* ── Flash overlay ── */
+    #flash {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.04s ease-in;
+    }
+
+    #flash.active {
+      opacity: 0.82;
+      transition: opacity 0.32s ease-out;
+    }
+
+    /* ── Permission denied message ── */
+    #denied-msg {
+      display: none;
+      font-size: 0.75rem;
+      opacity: 0.6;
+      text-align: center;
+      max-width: 260px;
+      line-height: 1.6;
+    }
+
+    /* ── Glow pulse on ready state ── */
+    @keyframes idleGlow {
+      0%, 100% { filter: drop-shadow(0 0 10px #FFB80044); }
+      50%       { filter: drop-shadow(0 0 22px #FFB80099); }
+    }
+
+    #whip-svg.idle {
+      animation: idleGlow 2.8s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Flash overlay -->
+  <div id="flash"></div>
+
+  <!-- Header -->
+  <header>
+    <h1>Whip App</h1>
+    <p>as seen on The Big Bang Theory</p>
+  </header>
+
+  <!-- Main content -->
+  <main>
+
+    <!-- iOS permission screen (shown first on iOS) -->
+    <div id="permission-screen" style="display:none;">
+      <p>iOS requires permission to<br>access motion sensors.</p>
+      <button id="enable-btn">Enable Whip</button>
+      <div id="denied-msg">
+        Permission denied.<br>Go to <strong>Settings → Safari → Motion &amp; Orientation Access</strong> and try again.
+      </div>
+    </div>
+
+    <!-- Start screen for non-iOS (unlocks audio via user gesture) -->
+    <div id="start-screen" style="display:none;">
+      <p>Tap to start, then snap your<br>phone like cracking a whip.</p>
+      <button id="start-btn">Start</button>
+    </div>
+
+    <!-- Main whip UI (hidden until permission granted / not needed) -->
+    <div id="whip-ui" style="display:none; flex-direction:column; align-items:center; gap:32px;">
+
+      <div id="whip-container">
+        <!-- Inline SVG whip -->
+        <svg id="whip-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="idle">
+          <!-- Handle -->
+          <rect x="20" y="92" width="48" height="16" rx="5" fill="#FFB800" opacity="0.9"/>
+          <!-- Whip body: bezier curve that tapers -->
+          <path d="M68 100 C100 60, 140 120, 170 85" stroke="#FFB800" stroke-width="5"
+                stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+          <path d="M68 100 C100 60, 140 120, 170 85" stroke="#FFB800" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+          <!-- Tip -->
+          <path d="M170 85 C180 78, 185 72, 183 65" stroke="#FFB800" stroke-width="2"
+                stroke-linecap="round" opacity="0.8"/>
+          <!-- Crack star at tip -->
+          <g id="crack-star" transform="translate(183, 63)" opacity="0">
+            <line x1="0" y1="-8" x2="0" y2="8" stroke="#FFB800" stroke-width="2" stroke-linecap="round"/>
+            <line x1="-8" y1="0" x2="8" y2="0" stroke="#FFB800" stroke-width="2" stroke-linecap="round"/>
+            <line x1="-6" y1="-6" x2="6" y2="6" stroke="#FFB800" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="6" y1="-6" x2="-6" y2="6" stroke="#FFB800" stroke-width="1.5" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+
+      <div id="counter-wrap">
+        <div id="counter-label">Cracks</div>
+        <span id="counter">0</span>
+      </div>
+
+      <!-- Tap to crack button (always visible) -->
+      <button id="tap-btn" style="display:inline-block">[ Tap to Crack ]</button>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer id="footer-hint">Snap your phone like cracking a whip</footer>
+
+  <script>
+    // ─── State ───────────────────────────────────────────────────
+    let audioCtx = null;
+    let crackCount = 0;
+
+    // Gesture detection state
+    const TRIGGER_THRESHOLD = 25;   // m/s² adjusted magnitude
+    const COOLDOWN_MS = 800;
+    const CONSECUTIVE_NEEDED = 2;
+    let lastCrackTime = 0;
+    let consecutiveCount = 0;
+    let nullAccelCount = 0;         // count null acceleration events → tap fallback
+    let motionListenerActive = false;
+
+    // DOM refs
+    const flash         = document.getElementById('flash');
+    const permScreen    = document.getElementById('permission-screen');
+    const enableBtn     = document.getElementById('enable-btn');
+    const deniedMsg     = document.getElementById('denied-msg');
+    const whipUi        = document.getElementById('whip-ui');
+    const whipSvg       = document.getElementById('whip-svg');
+    const crackStar     = document.getElementById('crack-star');
+    const counterEl     = document.getElementById('counter');
+    const tapBtn        = document.getElementById('tap-btn');
+    const footerHint    = document.getElementById('footer-hint');
+    const startScreen   = document.getElementById('start-screen');
+    const startBtn      = document.getElementById('start-btn');
+
+    // ─── AudioContext ─────────────────────────────────────────────
+    let audioUnlocked = false;
+
+    function ensureAudioCtx() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Must be called from a user gesture (tap/click) to unlock audio on mobile
+    function unlockAudio() {
+      ensureAudioCtx();
+      // Play a silent buffer to fully unlock the audio pipeline
+      const buf = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(audioCtx.destination);
+      src.start(0);
+      audioUnlocked = true;
+    }
+
+    // ─── Sound synthesis ─────────────────────────────────────────
+    let sharedNoiseBuffer = null;
+
+    function getNoiseBuffer(ctx) {
+      if (sharedNoiseBuffer && sharedNoiseBuffer.sampleRate === ctx.sampleRate) {
+        return sharedNoiseBuffer;
+      }
+      const length = Math.floor(ctx.sampleRate * 0.6);
+      const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+      sharedNoiseBuffer = buffer;
+      return buffer;
+    }
+
+    function makeDistortionCurve(amount = 65) {
+      const k = typeof amount === 'number' ? amount : 65;
+      const n = 1024;
+      const curve = new Float32Array(n);
+      const deg = Math.PI / 180;
+      for (let i = 0; i < n; i++) {
+        const x = (i * 2) / n - 1;
+        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+      }
+      return curve;
+    }
+
+    function synthesizeWhipCrack() {
+      ensureAudioCtx();
+      const ctx = audioCtx;
+      const now = ctx.currentTime + 0.004;
+      const intensity = 0.92 + Math.random() * 0.22;
+      const noiseBuffer = getNoiseBuffer(ctx);
+
+      const master = ctx.createGain();
+      master.gain.value = 0.85;
+
+      const compressor = ctx.createDynamicsCompressor();
+      compressor.threshold.value = -22;
+      compressor.knee.value = 7;
+      compressor.ratio.value = 10;
+      compressor.attack.value = 0.001;
+      compressor.release.value = 0.09;
+
+      master.connect(compressor);
+      compressor.connect(ctx.destination);
+
+      // Main crack transient.
+      const crackNoise = ctx.createBufferSource();
+      crackNoise.buffer = noiseBuffer;
+
+      const crackHP = ctx.createBiquadFilter();
+      crackHP.type = 'highpass';
+      crackHP.frequency.value = 1700 + Math.random() * 450;
+
+      const crackBP = ctx.createBiquadFilter();
+      crackBP.type = 'bandpass';
+      crackBP.frequency.value = 3600 + Math.random() * 700;
+      crackBP.Q.value = 2.7;
+
+      const crackDistortion = ctx.createWaveShaper();
+      crackDistortion.curve = makeDistortionCurve(75);
+      crackDistortion.oversample = '4x';
+
+      const crackGain = ctx.createGain();
+      crackGain.gain.setValueAtTime(0.0001, now);
+      crackGain.gain.exponentialRampToValueAtTime(1.75 * intensity, now + 0.0012);
+      crackGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+
+      crackNoise.connect(crackHP);
+      crackHP.connect(crackBP);
+      crackBP.connect(crackDistortion);
+      crackDistortion.connect(crackGain);
+      crackGain.connect(master);
+
+      crackNoise.start(now);
+      crackNoise.stop(now + 0.05);
+
+      // Body snap.
+      const snapOsc = ctx.createOscillator();
+      snapOsc.type = 'sawtooth';
+      snapOsc.frequency.setValueAtTime(230, now);
+      snapOsc.frequency.exponentialRampToValueAtTime(72, now + 0.055);
+
+      const snapLP = ctx.createBiquadFilter();
+      snapLP.type = 'lowpass';
+      snapLP.frequency.value = 950;
+      snapLP.Q.value = 0.85;
+
+      const snapGain = ctx.createGain();
+      snapGain.gain.setValueAtTime(0.0001, now);
+      snapGain.gain.exponentialRampToValueAtTime(0.32 * intensity, now + 0.003);
+      snapGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+
+      snapOsc.connect(snapLP);
+      snapLP.connect(snapGain);
+      snapGain.connect(master);
+
+      snapOsc.start(now);
+      snapOsc.stop(now + 0.075);
+
+      // Tail wash.
+      const tailNoise = ctx.createBufferSource();
+      tailNoise.buffer = noiseBuffer;
+
+      const tailBP = ctx.createBiquadFilter();
+      tailBP.type = 'bandpass';
+      tailBP.frequency.value = 1500;
+      tailBP.Q.value = 0.55;
+
+      const tailGain = ctx.createGain();
+      const tailStart = now + 0.01;
+      tailGain.gain.setValueAtTime(0.0001, tailStart);
+      tailGain.gain.exponentialRampToValueAtTime(0.2 * intensity, tailStart + 0.02);
+      tailGain.gain.exponentialRampToValueAtTime(0.0001, tailStart + 0.24);
+
+      tailNoise.connect(tailBP);
+      tailBP.connect(tailGain);
+      tailGain.connect(master);
+
+      tailNoise.start(tailStart);
+      tailNoise.stop(tailStart + 0.26);
+
+      // Click bite at the beginning.
+      const clickOsc = ctx.createOscillator();
+      clickOsc.type = 'triangle';
+      clickOsc.frequency.setValueAtTime(2400, now);
+      clickOsc.frequency.exponentialRampToValueAtTime(650, now + 0.014);
+
+      const clickGain = ctx.createGain();
+      clickGain.gain.setValueAtTime(0.22, now);
+      clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.016);
+
+      clickOsc.connect(clickGain);
+      clickGain.connect(master);
+
+      clickOsc.start(now);
+      clickOsc.stop(now + 0.018);
+    }
+
+    // ─── Gesture detection ────────────────────────────────────────
+    function onDeviceMotion(event) {
+      const ag = event.accelerationIncludingGravity;
+      if (!ag || ag.x === null || ag.y === null || ag.z === null) {
+        nullAccelCount++;
+        if (nullAccelCount > 10) activateTapFallback();
+        return;
+      }
+
+      const magnitude = Math.sqrt(ag.x * ag.x + ag.y * ag.y + ag.z * ag.z);
+      const adjusted  = Math.abs(magnitude - 9.8);
+
+      const now = Date.now();
+      if (now - lastCrackTime < COOLDOWN_MS) {
+        consecutiveCount = 0;
+        return;
+      }
+
+      if (adjusted > TRIGGER_THRESHOLD) {
+        consecutiveCount++;
+        if (consecutiveCount >= CONSECUTIVE_NEEDED) {
+          consecutiveCount = 0;
+          lastCrackTime = now;
+          triggerCrack();
+        }
+      } else {
+        consecutiveCount = 0;
+      }
+    }
+
+    function startMotionListener() {
+      if (motionListenerActive) return;
+      motionListenerActive = true;
+      window.addEventListener('devicemotion', onDeviceMotion);
+    }
+
+    // ─── triggerCrack orchestrator ────────────────────────────────
+    function triggerCrack() {
+      // 1. Sound
+      synthesizeWhipCrack();
+
+      // 2. Haptic (Android; no-op on iOS)
+      if (navigator.vibrate) navigator.vibrate([25, 15, 55]);
+
+      // 3. Flash
+      flash.classList.remove('active');
+      void flash.offsetWidth;
+      flash.classList.add('active');
+      setTimeout(() => flash.classList.remove('active'), 360);
+
+      // 4. Whip animation
+      whipSvg.classList.remove('idle', 'cracking');
+      void whipSvg.offsetWidth;
+      whipSvg.classList.add('cracking');
+      whipSvg.addEventListener('animationend', () => {
+        whipSvg.classList.remove('cracking');
+        whipSvg.classList.add('idle');
+      }, { once: true });
+
+      // 5. Crack star flash
+      crackStar.style.opacity = '1';
+      setTimeout(() => { crackStar.style.opacity = '0'; }, 150);
+
+      // 6. Spark particles
+      spawnSparks();
+
+      // 7. Counter
+      crackCount++;
+      counterEl.textContent = crackCount;
+      counterEl.classList.remove('bounce');
+      void counterEl.offsetWidth;
+      counterEl.classList.add('bounce');
+    }
+
+    // ─── Spark particles ──────────────────────────────────────────
+    function spawnSparks() {
+      const container = document.getElementById('whip-container');
+      const count = 7;
+      for (let i = 0; i < count; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        const angle = (i / count) * 2 * Math.PI;
+        const dist  = 55 + Math.random() * 35;
+        const tx    = Math.round(Math.cos(angle) * dist);
+        const ty    = Math.round(Math.sin(angle) * dist);
+        spark.style.setProperty('--tx', tx + 'px');
+        spark.style.setProperty('--ty', ty + 'px');
+        container.appendChild(spark);
+        // trigger reflow then add fly class
+        void spark.offsetWidth;
+        spark.classList.add('fly');
+        spark.addEventListener('animationend', () => spark.remove(), { once: true });
+      }
+    }
+
+    // ─── Tap fallback (desktop / no accelerometer) ────────────────
+    function activateTapFallback() {
+      motionListenerActive = false;
+      window.removeEventListener('devicemotion', onDeviceMotion);
+      tapBtn.style.display = 'inline-block';
+      footerHint.textContent = 'Tap the button to crack the whip';
+    }
+
+    tapBtn.addEventListener('click', () => {
+      if (!audioUnlocked) unlockAudio();
+      triggerCrack();
+    });
+
+    // ─── iOS permission flow ──────────────────────────────────────
+    function needsMotionPermission() {
+      return (
+        typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function'
+      );
+    }
+
+    enableBtn.addEventListener('click', async () => {
+      unlockAudio(); // create & unlock audio inside user gesture for iOS audio policy
+      try {
+        const result = await DeviceMotionEvent.requestPermission();
+        if (result === 'granted') {
+          showWhipUi();
+          startMotionListener();
+        } else {
+          deniedMsg.style.display = 'block';
+          enableBtn.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('Motion permission error:', err);
+        deniedMsg.style.display = 'block';
+      }
+    });
+
+    // ─── UI transitions ───────────────────────────────────────────
+    function showWhipUi() {
+      permScreen.style.display = 'none';
+      startScreen.style.display = 'none';
+      whipUi.style.display = 'flex';
+    }
+
+    function showPermissionScreen() {
+      permScreen.style.display = 'flex';
+      startScreen.style.display = 'none';
+      whipUi.style.display = 'none';
+    }
+
+    function showStartScreen() {
+      startScreen.style.display = 'flex';
+      permScreen.style.display = 'none';
+      whipUi.style.display = 'none';
+    }
+
+    // ─── Start button (non-iOS): unlocks audio via user gesture ──
+    startBtn.addEventListener('click', () => {
+      unlockAudio();
+      showWhipUi();
+      if (typeof DeviceMotionEvent !== 'undefined') {
+        startMotionListener();
+        setTimeout(() => {
+          if (nullAccelCount > 5) activateTapFallback();
+        }, 2000);
+      } else {
+        activateTapFallback();
+      }
+    });
+
+    // ─── Init ─────────────────────────────────────────────────────
+    function init() {
+      if (needsMotionPermission()) {
+        // iOS: needs motion permission (audio also unlocked via the enable button tap)
+        showPermissionScreen();
+      } else {
+        // Non-iOS: show start screen so user taps to unlock audio before motion detection
+        showStartScreen();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
+    // Service worker registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+</script>
+</body>
+</html>
